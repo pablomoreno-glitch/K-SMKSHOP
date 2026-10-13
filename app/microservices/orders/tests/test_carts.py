@@ -32,17 +32,24 @@ async def test_put_item_unknown_ref_404(client, respx_mock):
     assert resp.json() == {"error": "Producto no encontrado"}
 
 
-async def test_add_from_advisor_sets_source_and_item_count(client, respx_mock):
+async def test_add_item_defaults_to_catalog_source(client, respx_mock):
+    mock_by_refs(respx_mock, [make_product(ref="VW-158", price=45000)])
+    cart = (await client.post("/carts")).json()
+    resp = await client.put(f"/carts/{cart['token']}/items/VW-158", json={"quantity": 1})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["item_count"] == 1
+    assert body["items"][0]["source"] == "catalog"
+    assert body["items"][0]["ref"] == "VW-158"
+
+
+async def test_put_item_rejects_unknown_source(client, respx_mock):
     mock_by_refs(respx_mock, [make_product(ref="VW-158", price=45000)])
     cart = (await client.post("/carts")).json()
     resp = await client.put(
         f"/carts/{cart['token']}/items/VW-158", json={"quantity": 1, "source": "advisor"}
     )
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["item_count"] == 1
-    assert body["items"][0]["source"] == "advisor"
-    assert body["items"][0]["ref"] == "VW-158"
+    assert resp.status_code == 422
 
 
 async def test_unpriced_line_has_null_line_total(client, respx_mock):

@@ -101,7 +101,7 @@ export interface Business {
   media: BusinessMedia[];
 }
 
-export type CartSource = "catalog" | "advisor";
+export type CartSource = "catalog";
 
 export interface CartItem {
   ref: string;

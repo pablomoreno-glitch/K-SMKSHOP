@@ -22,7 +22,6 @@ def make_product(ref="VW-158", price=45000, is_active=True, name="Magnesium Comp
         "invima": "NSA-2040-2025",
         "benefits": ["Reduce el estrés y mejora el sueño"],
         "description": "Descripción",
-        "advisor_tags": [],
         "image_url": f"/media/products/{slug}.webp",
         "price": price,
         "is_viral": True,

@@ -16,8 +16,6 @@ class ServiceClient
 {
     public const DEFAULT_TIMEOUT = 10;
 
-    public const ADVISOR_TIMEOUT = 70;
-
     /**
      * Forward a request to an upstream service and return its response
      * (status and JSON body) unchanged.

@@ -203,8 +203,8 @@ async def put_cart_item(token: str, ref: str, payload: CartItemUpdate, db: Async
     if not (0 <= payload.quantity <= 99):
         raise HTTPException(422, "La cantidad debe estar entre 0 y 99.")
     source = payload.source or "catalog"
-    if source not in ("catalog", "advisor"):
-        raise HTTPException(422, 'El origen debe ser "catalog" o "advisor".')
+    if source != "catalog":
+        raise HTTPException(422, 'El origen debe ser "catalog".')
 
     cart = await db.get(Cart, token)
     if cart is None:
@@ -464,9 +464,6 @@ async def metrics(days: int = Query(30, ge=7, le=365), db: AsyncSession = Depend
     cancelled_count = by_status.get("cancelled", 0)
     cancellation_rate = round(cancelled_count / n_range, 2) if n_range else 0.0
 
-    advisor_orders = sum(1 for o in orders_in_range if any(item.source == "advisor" for item in o.items))
-    advisor_share = round(advisor_orders / n_range, 2) if n_range else 0.0
-
     daily_map: dict[str, dict] = {}
     cursor = start_date
     while cursor <= today:
@@ -499,7 +496,6 @@ async def metrics(days: int = Query(30, ge=7, le=365), db: AsyncSession = Depend
         "avg_order_value": avg_order_value,
         "units_sold": units_sold,
         "cancellation_rate": cancellation_rate,
-        "advisor_share": advisor_share,
         "daily": daily,
         "top_products": top_products,
     }

@@ -66,10 +66,3 @@ async def test_top_products_ranked_by_units(client):
     assert top[0]["ref"] == "AAA"
     assert top[0]["units"] == 3
 
-
-async def test_advisor_share_counts_orders_with_advisor_line(client):
-    await _insert_order("delivered", 10000, source="advisor")
-    await _insert_order("delivered", 10000, source="catalog")
-
-    resp = await client.get("/metrics", headers=INTERNAL_HEADERS)
-    assert resp.json()["advisor_share"] == 0.5
