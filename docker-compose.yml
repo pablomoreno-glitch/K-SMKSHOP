@@ -132,7 +132,8 @@ services:
       SERVICE_NOTIFICATIONS_URL: http://notifications:9206
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3300,http://localhost:5173}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@ksmkshop.com}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-VapeAdmin2026!}
+      # Without ADMIN_PASSWORD the seeder generates a random one and writes it to the gateway log.
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy

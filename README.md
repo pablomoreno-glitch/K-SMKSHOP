@@ -83,8 +83,22 @@ docker compose up -d --build
 | URL | Qué es |
 | --- | --- |
 | http://localhost:3300 | Tienda |
-| http://localhost:3300/admin | Panel (`admin@ksmkshop.com` / `VapeAdmin2026!` solo en local) |
+| http://localhost:3300/admin | Panel de administración |
 | http://localhost:8120/api/v1/health | Estado del gateway |
+
+### Cuenta de administrador
+
+El correo y la contraseña del panel se configuran con `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el archivo `.env` de la raíz del proyecto, que está ignorado por git y nunca se sube (las demás variables están en [deploy/env.example](deploy/env.example)).
+
+```dotenv
+ADMIN_EMAIL=tu-correo@ejemplo.com
+ADMIN_PASSWORD=una-frase-larga-que-solo-tu-conozcas
+```
+
+- Solo se usan la primera vez, para crear el administrador cuando todavía no existe. Cambiarlas después en `.env` no modifica la cuenta.
+- La contraseña se cambia desde el panel, en **Mi cuenta** (`/admin/cuenta`).
+- Si `ADMIN_PASSWORD` está vacío, el gateway genera una contraseña aleatoria y la deja en su log (`docker compose logs gateway`).
+- En producción, `deploy/deploy-vps.sh` genera una contraseña aleatoria en el servidor; ver [deploy/README.md](deploy/README.md).
 
 ## Pruebas
 
