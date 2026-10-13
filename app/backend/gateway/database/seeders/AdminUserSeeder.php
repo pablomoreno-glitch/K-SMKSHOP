@@ -18,7 +18,6 @@ class AdminUserSeeder extends Seeder
      * never touch the password of an existing account: the admin may have
      * changed it from the panel, and overwriting it here would silently
      * revert that change and lock them out on the next deploy.
-     * (Lesson from laVillaSB commit 0b34aec.)
      */
     public function run(): void
     {

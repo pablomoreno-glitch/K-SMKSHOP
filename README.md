@@ -31,8 +31,8 @@ Navegador ──> React (Vite + Tailwind)  ──/api──>  Gateway Laravel 12
                                                           PostgreSQL 16 (una base de datos por servicio)
 ```
 
-En local los puertos publicados no chocan con Salud Inteligente: tienda 3300, gateway 8120, servicios 9301 a 9306, Postgres 5732.
-Los contenedores se llaman `vape_*` y la red `vape`, así las dos tiendas pueden correr en el mismo VPS.
+Puertos publicados en local: tienda 3300, gateway 8120, servicios 9301 a 9306, Postgres 5732.
+Los contenedores se llaman `vape_*` y la red `vape`.
 
 ## Catálogo inicial
 
@@ -103,5 +103,4 @@ docker compose up -d --build
 
 ## Despliegue
 
-Igual que Salud Inteligente: tienda en Netlify y API en un VPS con Docker Compose detrás de Caddy. Ver [deploy/README.md](deploy/README.md).
-Para compartir el VPS de Salud Inteligente usa el proyecto `-p vape` y `docker-compose.shared.yml`.
+Tienda en Netlify y API en un servidor dedicado (VPS) con Docker Compose detrás de Caddy: `docker-compose.yml` + `docker-compose.prod.yml` + `docker-compose.caddy.yml`, que levanta `deploy/deploy-vps.sh`. Ver [deploy/README.md](deploy/README.md).

@@ -1,9 +1,8 @@
-# Production overrides for the API host (VPS): no published ports, no insecure defaults.
+# Production overrides for the dedicated API server (VPS): no published ports, no insecure defaults.
 #
-# Own server (this stack brings its own Caddy for TLS):
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d --build
-# Server shared with laVillaSB (its Caddy terminates TLS and proxies to our gateway):
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.shared.yml up -d --build
+#
+# deploy/deploy-vps.sh runs exactly that on the server.
 #
 # Differences from local:
 # - No service publishes a host port; Caddy (80/443) is the only public process.

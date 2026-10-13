@@ -14,7 +14,7 @@ Copia adaptada de salud-inteligente (pablomoreno-glitch/salud-inteligente), con 
 - `app/frontend`: React + Vite + Tailwind. Se publica en Netlify (`netlify.toml` reenvía `/api/*` al gateway).
 - `app/backend/gateway`: gateway en Laravel 12, el único punto público de la API.
 - `app/microservices/{business,catalog,inventory,orders,notifications}`: FastAPI.
-- Postgres 16, Docker Compose y Caddy en el VPS (`deploy/`, `docker-compose.*.yml`).
+- Postgres 16, Docker Compose y Caddy en un VPS dedicado (`deploy/`, `docker-compose.*.yml`).
 
 ## Datos clave
 
@@ -25,7 +25,8 @@ Copia adaptada de salud-inteligente (pablomoreno-glitch/salud-inteligente), con 
 - Promoción por paquete: `pack_price` y `pack_size` (por ejemplo 2 x $80.000). Se aplica en el carrito, el pedido y el mensaje de WhatsApp.
 - AgeGate obligatorio y advertencia de nicotina en el pie (`NICOTINE_WARNING` en `brand.ts`). No quitarlos.
 - Diseño oscuro con neón magenta `#FF4FC3` y cian `#45E3FF`. Fuentes Monoton, Unbounded y Figtree, servidas desde el propio sitio. Los tokens de Tailwind conservan los nombres originales (`paper`, `sage`, `ink`, `forest`, `leaf`).
-- Contenedores `vape_*`, red `vape`, puertos 3300 (tienda), 8120 (gateway), 9301-9306 (servicios) y 5732 (Postgres). En el VPS compartido: `docker-compose.shared.yml` con `-p vape`.
+- Contenedores `vape_*`, red `vape`, puertos 3300 (tienda), 8120 (gateway), 9301-9306 (servicios) y 5732 (Postgres).
+- Producción en un servidor dedicado, no compartido: `docker-compose.yml` + `docker-compose.prod.yml` + `docker-compose.caddy.yml` con `deploy/deploy-vps.sh`.
 
 ## Pruebas
 
@@ -47,5 +48,5 @@ cd app/frontend && npm ci && npm run lint && npm run test && npm run build
 1. Comprar `ksmkshop.com` y configurarlo en `netlify.toml` y en el `.env` del servidor.
 2. Reemplazar las fotos de producto por fotos propias.
 3. Cargar los sabores reales de cada producto.
-4. Desplegar: tienda en Netlify y API en el VPS compartido (`docker-compose.shared.yml`, `-p vape`).
+4. Desplegar: tienda en Netlify y API en el servidor dedicado (`deploy/deploy-vps.sh`).
 5. Logo y paleta definitivos.

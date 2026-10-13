@@ -6,7 +6,7 @@
 #     bash deploy/deploy-vps.sh
 #
 # Run it from a checkout on your machine against a bare Ubuntu 22.04/24.04 box
-# you can SSH into as root. Adapted from laVillaSB/deploy/deploy-vps.sh.
+# you can SSH into as root.
 #
 # Re-running is safe: provisioning is idempotent and an existing .env on the
 # host is kept, so secrets stay stable across deploys.
@@ -19,7 +19,7 @@ VPS_HOST="${VPS_HOST:?set VPS_HOST to the server IP}"
 VPS_USER="${VPS_USER:-root}"
 ROOT_DOMAIN="${ROOT_DOMAIN:-ksmkshop.com}"
 ACME_EMAIL="${ACME_EMAIL:?set ACME_EMAIL, the address for certificate expiry notices}"
-REPO_URL="${REPO_URL:-https://github.com/pablomoreno-glitch/ksmkshop.git}"
+REPO_URL="${REPO_URL:-https://github.com/pablomoreno-glitch/K-SMKSHOP.git}"
 BRANCH="${BRANCH:-main}"
 APP_DIR="${APP_DIR:-/opt/ksmkshop}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@${ROOT_DOMAIN}}"

@@ -1,7 +1,6 @@
 # Tienda de vapers - local stack.
-# Ports avoid the laVillaSB (3000, 5432, 8010, 9000-9007) and radioSanyo (3100, 5532, 9102)
-# stacks that run on the same machine. Only the frontend and the gateway need to be
-# reachable from the host; the service ports are published for debugging and /docs.
+# Only the frontend and the gateway need to be reachable from the host; the service
+# ports are published for debugging and /docs.
 #
 #   docker compose up -d --build
 #   open http://localhost:3300
