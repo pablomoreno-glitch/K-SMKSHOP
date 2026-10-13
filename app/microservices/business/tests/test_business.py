@@ -6,7 +6,7 @@ async def test_business_returns_profile_contacts_services_and_media(client):
     assert response.status_code == 200
 
     body = response.json()
-    assert body["profile"]["name"] == "Nube Neón"
+    assert body["profile"]["name"] == "K SMKSHOP"
     assert body["profile"]["tagline"]
     assert body["profile"]["description"]
     assert len(body["services"]) == 3

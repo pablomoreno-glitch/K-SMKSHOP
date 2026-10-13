@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://vape:vape@postgres:5432/vape_business"
     internal_token: str = "change-me"
 
-    business_name: str = "Nube Neón"
+    business_name: str = "K SMKSHOP"
     business_whatsapp: str | None = None
     business_phone: str | None = None
     business_email: str | None = None

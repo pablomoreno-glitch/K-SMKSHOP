@@ -1,5 +1,5 @@
 # Netlify serves the React storefront (app/frontend). The API (Laravel gateway +
-# FastAPI services) runs on the VPS at api.nubeneon.com; see deploy/README.md.
+# FastAPI services) runs on the VPS at api.ksmkshop.com; see deploy/README.md.
 #
 # Rollback to the legacy static site: publish = "public" with no base or command.
 
@@ -29,7 +29,7 @@
 # so no CORS is involved and the API host can change without rebuilding the SPA.
 [[redirects]]
   from = "/api/*"
-  to = "https://api.nubeneon.com/api/:splat"
+  to = "https://api.ksmkshop.com/api/:splat"
   status = 200
   force = true
 

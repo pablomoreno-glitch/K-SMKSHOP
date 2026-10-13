@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Vape Store - Catalog", lifespan=lifespan)
+app = FastAPI(title="K SMKSHOP - Catalog", lifespan=lifespan)
 install_error_handlers(app)
 
 SortKey = Literal["relevancia", "precio_asc", "precio_desc", "puffs_desc", "puffs_asc"]

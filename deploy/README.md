@@ -1,6 +1,6 @@
 # Deploying la tienda de vapers
 
-The storefront runs on Netlify, the API runs on one VPS, and the domain `nubeneon.com` ties them together.
+The storefront runs on Netlify, the API runs on one VPS, and the domain `ksmkshop.com` ties them together.
 
 | Piece | Where | Notes |
 | --- | --- | --- |
@@ -11,11 +11,11 @@ The storefront runs on Netlify, the API runs on one VPS, and the domain `nubeneo
 ## How the pieces talk
 
 ```
-browser --https--> nubeneon.com (Netlify CDN, React SPA)
+browser --https--> ksmkshop.com (Netlify CDN, React SPA)
                         |
                         | /api/*  (Netlify 200 proxy, same origin for the browser)
                         v
-                  api.nubeneon.com (Caddy, TLS)  -->  gateway (Laravel)  -->  business / catalog / inventory / orders
+                  api.ksmkshop.com (Caddy, TLS)  -->  gateway (Laravel)  -->  business / catalog / inventory / orders
                                                                                             |
                                                                                         PostgreSQL
 ```
@@ -25,12 +25,12 @@ Postgres, the gateway and every microservice stay on the internal Docker network
 
 ## Current setup: shared with laVillaSB
 
-Today the API runs on the laVillaSB VPS (`2.28.14.216`), next to lavillasb.com, in `/opt/vape-store`:
+Today the API runs on the laVillaSB VPS (`2.28.14.216`), next to lavillasb.com, in `/opt/ksmkshop`:
 
 - The stack starts with `docker compose -p vape -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.shared.yml up -d --build`.
-- No container of this stack publishes a port. laVillaSB's Caddy terminates TLS and proxies `api.nubeneon.com` to `vape_gateway:8110`, because the gateway also joins the `lavillasb_lavilla` network.
+- No container of this stack publishes a port. laVillaSB's Caddy terminates TLS and proxies `api.ksmkshop.com` to `vape_gateway:8110`, because the gateway also joins the `lavillasb_lavilla` network.
 - On that shared network the gateway reaches our own containers by their unique names (`vape_postgres`, `vape_catalog`, ...), never by short names that belong to laVillaSB.
-- Secrets live in `/opt/vape-store/.env` (generated on the server, `chmod 600`).
+- Secrets live in `/opt/ksmkshop/.env` (generated on the server, `chmod 600`).
 
 Publishing the API once the DNS record `api` -> `2.28.14.216` exists:
 
@@ -44,8 +44,8 @@ The same block should be committed to the laVillaSB repository so its own deploy
 Updating the API after new commits on this repository:
 
 ```bash
-git archive --format=tar dev | ssh root@2.28.14.216 'tar -x -C /opt/vape-store'
-ssh root@2.28.14.216 'cd /opt/vape-store && docker compose -p vape -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.shared.yml up -d --build'
+git archive --format=tar dev | ssh root@2.28.14.216 'tar -x -C /opt/ksmkshop'
+ssh root@2.28.14.216 'cd /opt/ksmkshop && docker compose -p vape -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.shared.yml up -d --build'
 ```
 
 The rest of this guide describes a dedicated server for la tienda de vapers, for when it outgrows the shared one.
@@ -57,7 +57,7 @@ Make sure you can `ssh root@<ip>`.
 
 ## 2. Point `api` at it
 
-At Porkbun, `nubeneon.com` -> DNS, add:
+At Porkbun, `ksmkshop.com` -> DNS, add:
 
 | Type | Host | Answer |
 | --- | --- | --- |
@@ -76,16 +76,16 @@ BUSINESS_WHATSAPP=57XXXXXXXXXX BRANCH=main \
   bash deploy/deploy-vps.sh
 ```
 
-The script checks DNS, provisions the host (Docker, swap, firewall, unattended upgrades), clones the branch, generates every secret on the server, starts the stack and waits until `https://api.nubeneon.com/api/v1/health` answers.
+The script checks DNS, provisions the host (Docker, swap, firewall, unattended upgrades), clones the branch, generates every secret on the server, starts the stack and waits until `https://api.ksmkshop.com/api/v1/health` answers.
 It is idempotent: re-running it updates the code and keeps the existing secrets.
 
 Read the generated admin password with:
 
 ```bash
-ssh root@<vps-ip> 'grep ADMIN_ /opt/vape-store/.env'
+ssh root@<vps-ip> 'grep ADMIN_ /opt/ksmkshop/.env'
 ```
 
-Then sign in at `https://nubeneon.com/admin` and change it.
+Then sign in at `https://ksmkshop.com/admin` and change it.
 
 ## 4. Deploy the storefront
 
@@ -97,7 +97,7 @@ Deploy the API (step 3) before merging `dev` into the production branch, otherwi
 ## Updating
 
 ```bash
-ssh root@<vps-ip> 'cd /opt/vape-store && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build'
+ssh root@<vps-ip> 'cd /opt/ksmkshop && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build'
 ```
 
 ## Rollback

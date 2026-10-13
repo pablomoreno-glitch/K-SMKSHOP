@@ -97,15 +97,15 @@ if ! id -u "$DEPLOY_USER" >/dev/null 2>&1; then
   fi
 fi
 
-install -d -o "$DEPLOY_USER" -g "$DEPLOY_USER" /opt/vape-store
+install -d -o "$DEPLOY_USER" -g "$DEPLOY_USER" /opt/ksmkshop
 
 cat <<EOF
 
 Host is ready.
 
 Next, as ${DEPLOY_USER}:
-  git clone <repo-url> /opt/vape-store
-  cd /opt/vape-store
+  git clone <repo-url> /opt/ksmkshop
+  cd /opt/ksmkshop
   cp deploy/env.example .env
   \$EDITOR .env            # fill every secret
   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d

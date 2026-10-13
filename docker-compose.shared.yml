@@ -1,10 +1,10 @@
 # Run on a server that already has a Caddy in front (the laVillaSB VPS).
 #
 # That Caddy joins nothing of ours: instead our gateway joins its Docker network,
-# so its Caddyfile can proxy api.nubeneon.com to vape_gateway:8110.
+# so its Caddyfile can proxy api.ksmkshop.com to vape_gateway:8110.
 # The storefront is normally served by Netlify, so the frontend container only
 # starts with the "vps-storefront" profile; it then joins the same network and
-# Caddy serves nubeneon.com from vape_frontend:80.
+# Caddy serves ksmkshop.com from vape_frontend:80.
 #
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.shared.yml up -d --build
 #   docker compose ... --profile vps-storefront up -d --build frontend

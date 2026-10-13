@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# Serve the storefront (nubeneon.com) from the VPS through the Caddy
+# Serve the storefront (ksmkshop.com) from the VPS through the Caddy
 # that already serves lavillasb.com, instead of Netlify. Run it from this
 # checkout once the frontend container is up and the DNS records point here:
 #
-#   ssh root@2.28.14.216 'cd /opt/vape-store && docker compose -p vape \
+#   ssh root@2.28.14.216 'cd /opt/ksmkshop && docker compose -p vape \
 #     -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.shared.yml \
 #     --profile vps-storefront up -d --build frontend'
 #   VPS_HOST=2.28.14.216 bash deploy/attach-storefront-to-lavilla-caddy.sh
@@ -20,7 +20,7 @@
 set -euo pipefail
 
 VPS_HOST="${VPS_HOST:?set VPS_HOST}"
-SITE_HOST="${SITE_HOST:-nubeneon.com}"
+SITE_HOST="${SITE_HOST:-ksmkshop.com}"
 CADDYFILE="${CADDYFILE:-/opt/lavillasb/deploy/Caddyfile}"
 CADDY_CONTAINER="${CADDY_CONTAINER:-lavilla_caddy}"
 
@@ -49,7 +49,7 @@ else
   cp -p "$caddyfile" "$backup"
   cat >> "$caddyfile" <<BLOCK
 
-# --- la tienda de vapers storefront (stack in /opt/vape-store) -----------
+# --- la tienda de vapers storefront (stack in /opt/ksmkshop) -----------
 # The React build served by nginx in vape_frontend, which also proxies /api to
 # vape_gateway. It joined this network through docker-compose.shared.yml.
 $site_host {

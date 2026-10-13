@@ -1,7 +1,7 @@
-# vape-store
+# K SMKSHOP
 
 Tienda en línea de vapes desechables, pods, líquidos y accesorios para Colombia.
-Nombre de trabajo: **Nube Neón** (`nubeneon.com`), pendiente de confirmar y de comprar el dominio.
+Tienda: **K SMKSHOP**. Dominio previsto: `ksmkshop.com` (sin comprar todavía).
 
 Parte de la arquitectura de [salud-inteligente](https://github.com/pablomoreno-glitch/salud-inteligente), pero es un proyecto independiente: repositorio, base de datos, contenedores, dominio y variables de entorno propios.
 
@@ -52,7 +52,7 @@ El seed solo se carga con la base vacía. Después, todo se edita desde el panel
 
 ## API
 
-Base: `https://api.nubeneon.com/api`. Desde la tienda también responde en `/api/...` porque Netlify la reenvía al gateway.
+Base: `https://api.ksmkshop.com/api`. Desde la tienda también responde en `/api/...` porque Netlify la reenvía al gateway.
 
 | Método | Ruta | Para qué |
 | --- | --- | --- |
@@ -71,7 +71,7 @@ Base: `https://api.nubeneon.com/api`. Desde la tienda también responde en `/api
 Las rutas `/admin/*` (pedidos, inventario, productos, mensajes, SMS) son las mismas de Salud Inteligente; `PATCH /admin/products/{ref}` acepta además `flavors`, `puffs`, `nicotine_percent`, `battery_mah`, `charging`, `modes`, `device_type`, `pack_price`, `pack_size`, `is_featured` e `is_new`.
 
 ```bash
-curl "https://api.nubeneon.com/api/v1/catalog/products?brand=Nimmbox,Adjust&puffs_min=40000"
+curl "https://api.ksmkshop.com/api/v1/catalog/products?brand=Nimmbox,Adjust&puffs_min=40000"
 ```
 
 ## Desarrollo local
@@ -83,7 +83,7 @@ docker compose up -d --build
 | URL | Qué es |
 | --- | --- |
 | http://localhost:3300 | Tienda |
-| http://localhost:3300/admin | Panel (`admin@nubeneon.com` / `VapeAdmin2026!` solo en local) |
+| http://localhost:3300/admin | Panel (`admin@ksmkshop.com` / `VapeAdmin2026!` solo en local) |
 | http://localhost:8120/api/v1/health | Estado del gateway |
 
 ## Pruebas

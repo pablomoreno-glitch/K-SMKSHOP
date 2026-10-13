@@ -1,6 +1,6 @@
 # Gateway (Laravel 12)
 
-The gateway is the only public entry point of the vape store API.
+The gateway is the only public entry point of the K SMKSHOP API.
 It authenticates admins with Sanctum, proxies an explicit allowlist of routes to the internal FastAPI microservices, and aggregates the admin dashboard and health check.
 See `openspec/changes/microservices-platform/design.md` (sections 1, 4 and 5) for the full contract this app implements.
 

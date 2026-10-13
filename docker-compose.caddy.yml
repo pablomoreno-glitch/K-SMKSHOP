@@ -1,4 +1,4 @@
-# TLS for a server dedicated to the vape store: Caddy is the only public process.
+# TLS for a server dedicated to the K SMKSHOP: Caddy is the only public process.
 # Used together with docker-compose.prod.yml (see its header).
 
 services:

@@ -30,7 +30,7 @@ export const endpoints: ApiEndpoint[] = [
     path: "/v1/business",
     description: "Perfil del negocio, contactos, servicios y medios.",
     example: `{
-  "profile": { "name": "Nube Neón", "tagline": "...", "description": "..." },
+  "profile": { "name": "K SMKSHOP", "tagline": "...", "description": "..." },
   "contacts": { "whatsapp": "573001112233" },
   "services": [],
   "media": []
@@ -45,11 +45,11 @@ export const endpoints: ApiEndpoint[] = [
     example: `{
   "whatsapp": "573001112233",
   "phone": null,
-  "email": "hola@nubeneon.com",
+  "email": "hola@ksmkshop.com",
   "address": null,
   "city": "Bogotá",
   "hours": "Lun a sáb, 8am a 6pm",
-  "instagram": "@nubeneon",
+  "instagram": "@ksmkshop",
   "facebook": null
 }`,
     group: "Negocio",
@@ -190,7 +190,7 @@ export const endpoints: ApiEndpoint[] = [
     method: "POST",
     path: "/admin/login",
     description: "Autenticación del panel de administración.",
-    example: `{ "token": "...", "user": { "id": 1, "name": "Admin", "email": "admin@nubeneon.lat" } }`,
+    example: `{ "token": "...", "user": { "id": 1, "name": "Admin", "email": "admin@ksmkshop.lat" } }`,
     group: "Administración",
     admin: true,
   },

@@ -1,6 +1,6 @@
 # business
 
-FastAPI microservice for the vape store business profile: contact channels, services, media and incoming contact messages.
+FastAPI microservice for the K SMKSHOP business profile: contact channels, services, media and incoming contact messages.
 
 ## Endpoints
 

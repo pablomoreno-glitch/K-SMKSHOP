@@ -1,7 +1,7 @@
 # orders
 
 FastAPI microservice for carts, checkout, order lifecycle, tracking and sales metrics.
-Part of the `vape-store` microservices platform (design section 4.4).
+Part of the `ksmkshop` microservices platform (design section 4.4).
 
 ## Run locally
 

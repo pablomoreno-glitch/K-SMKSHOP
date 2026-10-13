@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Vape Store - Inventory", lifespan=lifespan)
+app = FastAPI(title="K SMKSHOP - Inventory", lifespan=lifespan)
 install_error_handlers(app)
 
 

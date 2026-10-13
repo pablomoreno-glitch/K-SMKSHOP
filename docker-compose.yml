@@ -51,7 +51,7 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql+asyncpg://vape:${POSTGRES_PASSWORD:-vape}@postgres:5432/vape_business
-      BUSINESS_NAME: ${BUSINESS_NAME:-Nube Neón}
+      BUSINESS_NAME: ${BUSINESS_NAME:-K SMKSHOP}
       BUSINESS_WHATSAPP: ${BUSINESS_WHATSAPP:-573044497385}
       BUSINESS_PHONE: ${BUSINESS_PHONE:-+57 304 4497385}
       BUSINESS_EMAIL: ${BUSINESS_EMAIL:-}
@@ -132,7 +132,7 @@ services:
       SERVICE_ORDERS_URL: http://orders:9204
       SERVICE_NOTIFICATIONS_URL: http://notifications:9206
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3300,http://localhost:5173}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@nubeneon.com}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@ksmkshop.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-VapeAdmin2026!}
     depends_on:
       postgres:

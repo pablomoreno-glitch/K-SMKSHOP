@@ -36,7 +36,7 @@ export function AgeGate() {
       aria-describedby="age-desc"
     >
       <div className="gate-card w-full max-w-md rounded-tile border border-line bg-sage p-7 text-center shadow-2xl">
-        <p className="neon-text font-neon text-[34px] leading-none sm:text-[40px]">{BRAND.name}</p>
+        <p className="neon-text font-neon text-[34px] leading-none [word-spacing:0.3em] sm:text-[40px]">{BRAND.name}</p>
 
         {refused ? (
           <>

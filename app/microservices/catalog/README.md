@@ -1,6 +1,6 @@
 # catalog
 
-FastAPI microservice for the vape store catalog: categories (tiers), products with their vape specs, prices and pack promotions.
+FastAPI microservice for the K SMKSHOP catalog: categories (tiers), products with their vape specs, prices and pack promotions.
 
 ## Endpoints
 

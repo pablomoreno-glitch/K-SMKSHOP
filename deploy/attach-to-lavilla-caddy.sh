@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Publish api.nubeneon.com through the Caddy that already serves
+# Publish api.ksmkshop.com through the Caddy that already serves
 # lavillasb.com on the shared VPS. Run it from this checkout once the DNS
 # record `api` -> VPS exists:
 #
@@ -15,7 +15,7 @@
 set -euo pipefail
 
 VPS_HOST="${VPS_HOST:?set VPS_HOST}"
-API_HOST="${API_HOST:-api.nubeneon.com}"
+API_HOST="${API_HOST:-api.ksmkshop.com}"
 CADDYFILE="${CADDYFILE:-/opt/lavillasb/deploy/Caddyfile}"
 CADDY_CONTAINER="${CADDY_CONTAINER:-lavilla_caddy}"
 
@@ -42,7 +42,7 @@ else
   cp -p "$caddyfile" "$backup"
   cat >> "$caddyfile" <<BLOCK
 
-# --- la tienda de vapers API (stack in /opt/vape-store) ------------------
+# --- la tienda de vapers API (stack in /opt/ksmkshop) ------------------
 # The storefront lives on Netlify and proxies /api/* here. Only the gateway is
 # reachable; it joined this network through docker-compose.shared.yml.
 $api_host {

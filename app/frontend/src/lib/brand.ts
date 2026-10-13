@@ -1,8 +1,8 @@
 // Everything that names the store lives here, so choosing the final name and domain is a one-file change
 // (plus index.html and BUSINESS_NAME on the server).
 export const BRAND = {
-  name: "Nube Neón",
-  domain: "nubeneon.com",
+  name: "K SMKSHOP",
+  domain: "ksmkshop.com",
   tagline: "Vapes desechables con la ficha técnica a la vista",
   /** WhatsApp for questions before ordering, digits only with country code. */
   whatsapp: "573044497385",

@@ -17,11 +17,11 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 VPS_HOST="${VPS_HOST:?set VPS_HOST to the server IP}"
 VPS_USER="${VPS_USER:-root}"
-ROOT_DOMAIN="${ROOT_DOMAIN:-nubeneon.com}"
+ROOT_DOMAIN="${ROOT_DOMAIN:-ksmkshop.com}"
 ACME_EMAIL="${ACME_EMAIL:?set ACME_EMAIL, the address for certificate expiry notices}"
-REPO_URL="${REPO_URL:-https://github.com/pablomoreno-glitch/vape-store.git}"
+REPO_URL="${REPO_URL:-https://github.com/pablomoreno-glitch/ksmkshop.git}"
 BRANCH="${BRANCH:-main}"
-APP_DIR="${APP_DIR:-/opt/vape-store}"
+APP_DIR="${APP_DIR:-/opt/ksmkshop}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@${ROOT_DOMAIN}}"
 
 SSH=(ssh -o StrictHostKeyChecking=accept-new "${VPS_USER}@${VPS_HOST}")
@@ -68,7 +68,7 @@ else
 ROOT_DOMAIN=${ROOT_DOMAIN}
 ACME_EMAIL=${ACME_EMAIL}
 ADMIN_EMAIL=${ADMIN_EMAIL}
-BUSINESS_NAME=${BUSINESS_NAME:-Nube Neón}
+BUSINESS_NAME=${BUSINESS_NAME:-K SMKSHOP}
 BUSINESS_WHATSAPP=${BUSINESS_WHATSAPP:-573044497385}
 BUSINESS_PHONE=${BUSINESS_PHONE:-+57 304 4497385}
 BUSINESS_EMAIL=${BUSINESS_EMAIL:-}
