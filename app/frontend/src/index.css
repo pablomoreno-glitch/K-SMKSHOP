@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink;
+  }
+
+  input,
+  select,
+  textarea {
+    color-scheme: dark;
+  }
+
+  :focus-visible {
+    outline: 2px solid #45e3ff;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* The neon wordmark: the one place the page glows. */
+.neon-text {
+  color: #ffe6f7;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 8px #ff4fc3,
+    0 0 22px #ff4fc3,
+    0 0 42px rgba(255, 79, 195, 0.6);
+}
+.neon-tube {
+  background: linear-gradient(90deg, #45e3ff, #ff4fc3);
+  box-shadow: 0 0 10px rgba(69, 227, 255, 0.55), 0 0 24px rgba(255, 79, 195, 0.45);
+}
+
+/* The sign flickers on once when the page loads, like a tube warming up. */
+@keyframes neon-on {
+  0%, 18%, 22%, 30% { opacity: 0.25; }
+  20%, 26%, 100% { opacity: 1; }
+}
+.neon-on { animation: neon-on 1.4s steps(1, end) 0.2s both; }
+
+@keyframes gate-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.gate-card { animation: gate-in 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-on, .gate-card { animation: none; }
+}

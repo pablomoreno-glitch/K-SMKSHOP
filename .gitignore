@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (NUNCA subir la API key)
+.env
+.env.*
+!.env.example
+
+# Netlify
+.netlify/
+deno.lock
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Frontend and gateway build artifacts
+dist/
+*.tsbuildinfo
+vendor/
+
+# Local agent tooling
+.atl/

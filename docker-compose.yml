@@ -1,0 +1,159 @@
+# Tienda de vapers - local stack.
+# Ports avoid the laVillaSB (3000, 5432, 8010, 9000-9007) and radioSanyo (3100, 5532, 9102)
+# stacks that run on the same machine. Only the frontend and the gateway need to be
+# reachable from the host; the service ports are published for debugging and /docs.
+#
+#   docker compose up -d --build
+#   open http://localhost:3300
+
+x-service-env: &service-env
+  INTERNAL_TOKEN: ${INTERNAL_TOKEN:-local-internal-token}
+
+x-service-common: &service-common
+  restart: unless-stopped
+  networks: [vape]
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: vape_postgres
+    environment:
+      POSTGRES_USER: vape
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vape}
+      POSTGRES_DB: vape
+    ports:
+      - "5732:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vape -d vape"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks: [vape]
+
+  # ============================================================
+  # DOMAIN MICROSERVICES (FastAPI)
+  # ============================================================
+  business:
+    <<: *service-common
+    build: ./app/microservices/business
+    container_name: vape_business
+    ports: ["9301:9201"]
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql+asyncpg://vape:${POSTGRES_PASSWORD:-vape}@postgres:5432/vape_business
+      BUSINESS_NAME: ${BUSINESS_NAME:-Nube Neón}
+      BUSINESS_WHATSAPP: ${BUSINESS_WHATSAPP:-573044497385}
+      BUSINESS_PHONE: ${BUSINESS_PHONE:-+57 304 4497385}
+      BUSINESS_EMAIL: ${BUSINESS_EMAIL:-}
+      BUSINESS_ADDRESS: ${BUSINESS_ADDRESS:-}
+      BUSINESS_CITY: ${BUSINESS_CITY:-}
+      BUSINESS_HOURS: ${BUSINESS_HOURS:-}
+      BUSINESS_INSTAGRAM: ${BUSINESS_INSTAGRAM:-}
+      BUSINESS_FACEBOOK: ${BUSINESS_FACEBOOK:-}
+
+  catalog:
+    <<: *service-common
+    build: ./app/microservices/catalog
+    container_name: vape_catalog
+    ports: ["9302:9202"]
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql+asyncpg://vape:${POSTGRES_PASSWORD:-vape}@postgres:5432/vape_catalog
+
+  inventory:
+    <<: *service-common
+    build: ./app/microservices/inventory
+    container_name: vape_inventory
+    ports: ["9303:9203"]
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql+asyncpg://vape:${POSTGRES_PASSWORD:-vape}@postgres:5432/vape_inventory
+
+  orders:
+    <<: *service-common
+    build: ./app/microservices/orders
+    container_name: vape_orders
+    ports: ["9304:9204"]
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql+asyncpg://vape:${POSTGRES_PASSWORD:-vape}@postgres:5432/vape_orders
+      CATALOG_URL: http://catalog:9202
+      INVENTORY_URL: http://inventory:9203
+      BUSINESS_URL: http://business:9201
+      NOTIFICATIONS_URL: http://notifications:9206
+
+  notifications:
+    <<: *service-common
+    build: ./app/microservices/notifications
+    container_name: vape_notifications
+    ports: ["9306:9206"]
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql+asyncpg://vape:${POSTGRES_PASSWORD:-vape}@postgres:5432/vape_notifications
+      # SMS to the business on every new order. Without these, messages are recorded as "skipped".
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
+      TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
+      ORDER_SMS_TO: ${ORDER_SMS_TO:-+573044497385}
+
+  # ============================================================
+  # API GATEWAY (Laravel)
+  # ============================================================
+  gateway:
+    build: ./app/backend/gateway
+    container_name: vape_gateway
+    ports: ["8120:8110"]
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "false"
+      APP_KEY: ${GATEWAY_APP_KEY:-base64:g9QErmSAESOvize+GUVnQYPce16ELn4ixDZOB5PT3z4=}
+      APP_URL: http://localhost:8110
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: vape_gateway
+      DB_USERNAME: vape
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-vape}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-local-internal-token}
+      SERVICE_BUSINESS_URL: http://business:9201
+      SERVICE_CATALOG_URL: http://catalog:9202
+      SERVICE_INVENTORY_URL: http://inventory:9203
+      SERVICE_ORDERS_URL: http://orders:9204
+      SERVICE_NOTIFICATIONS_URL: http://notifications:9206
+      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3300,http://localhost:5173}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@nubeneon.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-VapeAdmin2026!}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [vape]
+
+  # ============================================================
+  # FRONTEND (React + Vite, served by nginx, proxies /api to the gateway)
+  # ============================================================
+  frontend:
+    build: ./app/frontend
+    container_name: vape_frontend
+    ports: ["3300:80"]
+    depends_on: [gateway]
+    restart: unless-stopped
+    networks: [vape]
+
+volumes:
+  postgres_data:
+
+networks:
+  vape:
+    name: vape
