@@ -100,6 +100,24 @@ ADMIN_PASSWORD=una-frase-larga-que-solo-tu-conozcas
 - Si `ADMIN_PASSWORD` está vacío, el gateway genera una contraseña aleatoria y la deja en su log (`docker compose logs gateway`).
 - En producción, `deploy/deploy-vps.sh` genera una contraseña aleatoria en el servidor; ver [deploy/README.md](deploy/README.md).
 
+### Más administradores
+
+El panel admite varios administradores. No se crean desde la web, solo con acceso al servidor:
+
+```bash
+docker compose exec gateway php artisan admin:create correo@ejemplo.com --name="Nombre"
+```
+
+El comando muestra una sola vez una contraseña aleatoria de 20 caracteres. Pásasela a la persona por un canal privado; al entrar, ella la cambia en **Mi cuenta**.
+
+Para quitarle el acceso (la cuenta se conserva, pero no puede entrar y se cierran sus sesiones):
+
+```bash
+docker compose exec gateway php artisan admin:revoke correo@ejemplo.com
+```
+
+`admin:revoke` no deja quitar el acceso al último administrador.
+
 ## Pruebas
 
 | Capa | Comando |
