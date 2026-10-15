@@ -29,9 +29,15 @@ COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml -f dock
 
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$1"; }
 
+# getent is missing on macOS and Git Bash, and on Windows "python3" may be the
+# Microsoft Store stub, so try each resolver until one prints an address.
 resolve_a() {
-  getent ahostsv4 "$1" 2>/dev/null | awk '/STREAM|RAW/ {print $1; exit}' && return 0
-  python3 -c 'import socket,sys; print(socket.gethostbyname(sys.argv[1]))' "$1" 2>/dev/null || true
+  getent ahostsv4 "$1" 2>/dev/null | awk '/STREAM|RAW/ {print $1; exit}' | grep . && return 0
+  local py
+  for py in python3 python; do
+    "$py" -c 'import socket,sys; print(socket.gethostbyname(sys.argv[1]))' "$1" 2>/dev/null && return 0
+  done
+  return 0
 }
 
 log "Checking DNS"

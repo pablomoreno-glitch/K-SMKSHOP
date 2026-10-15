@@ -1,135 +1,178 @@
-# Deploying la tienda de vapers
+# Despliegue de K SMKSHOP
 
-The storefront runs on Netlify, the API runs on one VPS, and the domain `ksmkshop.com` ties them together.
+La tienda corre en Netlify, la API en un VPS dedicado y el dominio `ksmkshop.com` las une.
 
-| Piece | Where | Notes |
+| Pieza | Dónde | Notas |
 | --- | --- | --- |
-| Storefront (React build of `app/frontend`) | Netlify | Built on every push to the production branch; see `netlify.toml` |
-| Gateway, six FastAPI services, Postgres | Dedicated VPS with Docker Compose behind Caddy | `docker-compose.yml` + `docker-compose.prod.yml` + `docker-compose.caddy.yml` |
-| DNS | Porkbun | Apex and `www` already point at Netlify; `api` must point at the VPS |
+| Tienda (build de React de `app/frontend`) | Netlify | Se construye en cada push a `main`; ver `netlify.toml` |
+| Gateway, cinco servicios FastAPI, Postgres y respaldos | VPS dedicado con Docker Compose detrás de Caddy | `docker-compose.yml` + `docker-compose.prod.yml` + `docker-compose.caddy.yml` |
+| DNS | Donde compres el dominio | Raíz y `www` apuntan a Netlify; `api` y `storefront` al VPS |
 
-## How the pieces talk
+## Cómo se conectan
 
 ```
-browser --https--> ksmkshop.com (Netlify CDN, React SPA)
+navegador --https--> ksmkshop.com (Netlify, SPA de React)
                         |
-                        | /api/*  (Netlify 200 proxy, same origin for the browser)
+                        | /api/*  (proxy 200 de Netlify: mismo origen para el navegador)
                         v
-                  api.ksmkshop.com (Caddy, TLS)  -->  gateway (Laravel)  -->  business / catalog / inventory / orders
+                  api.ksmkshop.com (Caddy, TLS)  -->  gateway (Laravel)  -->  business / catalog / inventory / orders / notifications
                                                                                             |
                                                                                         PostgreSQL
 ```
 
-Only Caddy listens on the public interface of the VPS.
-Postgres, the gateway and every microservice stay on the internal Docker network.
+Solo Caddy escucha en la interfaz pública del VPS (puertos 80 y 443).
+Postgres, el gateway y los microservicios quedan en la red interna de Docker.
+El servidor es exclusivo de K SMKSHOP; ningún otro proyecto lo comparte.
 
-The API runs on a server dedicated to K SMKSHOP; no other project shares it.
-The only production stack is `docker-compose.yml` + `docker-compose.prod.yml` + `docker-compose.caddy.yml`, started by `deploy/deploy-vps.sh`.
+## Guía rápida: VPS nuevo
 
-## 1. Get a VPS
+### 1. Contratar el servidor
 
-Any 2 vCPU / 4 GB Ubuntu 22.04 or 24.04 box works (Hetzner CX22, DigitalOcean, Vultr, Linode).
-Make sure you can `ssh root@<ip>`.
+Con 2 vCPU, 4 GB de RAM y 40 GB de disco o más alcanza. Imagen: **Ubuntu 24.04**.
 
-## 2. Point `api` at it
-
-At Porkbun, `ksmkshop.com` -> DNS, add:
-
-| Type | Host | Answer |
+| Proveedor | Plan | Notas |
 | --- | --- | --- |
-| A | `api` | the VPS IPv4 |
+| Hetzner Cloud | CPX22 (2 vCPU, 4 GB, 80 GB) en Ashburn o Hillsboro (EE. UU.), las ubicaciones más cercanas a Colombia. El CX23 (2 vCPU, 4 GB, 40 GB) es más barato, pero solo existe en Alemania y Finlandia (más latencia) y a veces no está disponible | Deja marcada la IPv4 pública |
+| DigitalOcean | Droplet Basic, Regular, 2 vCPU / 4 GB / 80 GB | Región NYC o Atlanta |
 
-Keep the existing apex `ALIAS` and `www` `CNAME` records that point at Netlify.
-The record must resolve before the first start, or Caddy cannot get a certificate.
+Los precios cambiaron varias veces en 2026; revísalos en la página del proveedor antes de contratar.
+Activa los respaldos del proveedor si el presupuesto lo permite: protegen también contra perder el servidor completo.
 
-## 3. Deploy the API
-
-From a checkout of this repository:
-
-```bash
-VPS_HOST=<vps-ip> ACME_EMAIL=<you@example.com> \
-BUSINESS_WHATSAPP=57XXXXXXXXXX BRANCH=main \
-  bash deploy/deploy-vps.sh
-```
-
-The script checks DNS, provisions the host (Docker, swap, firewall, unattended upgrades), clones the branch, generates every secret on the server, starts the stack and waits until `https://api.ksmkshop.com/api/v1/health` answers.
-It is idempotent: re-running it updates the code and keeps the existing secrets.
-
-Read the generated admin password with:
+Al crearlo, agrega tu llave SSH en vez de una contraseña. Si no tienes una, créala en tu PC (Git Bash o PowerShell):
 
 ```bash
-ssh root@<vps-ip> 'grep ADMIN_ /opt/ksmkshop/.env'
+ssh-keygen -t ed25519 -C "pabloandresmorenohidalgo@gmail.com"
 ```
 
-Then sign in at `https://ksmkshop.com/admin` and change it.
-
-## 4. Deploy the storefront
-
-Netlify builds `app/frontend` automatically when the production branch is pushed (settings live in `netlify.toml`).
-No environment variables are needed in Netlify.
-
-Deploy the API (step 3) before merging `dev` into the production branch, otherwise the new storefront loads but its `/api` calls fail.
-
-## Updating
+Copia el contenido de `~/.ssh/id_ed25519.pub` en el campo "SSH key" del proveedor.
+Cuando el servidor esté listo, anota su IPv4 y comprueba que entras:
 
 ```bash
-ssh root@<vps-ip> 'cd /opt/ksmkshop && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d --build'
+ssh root@<ip-del-vps>
 ```
 
-## Backups
+### 2. Registros DNS de ksmkshop.com
 
-The `backup` service of `docker-compose.prod.yml` (container `vape_backup`) dumps every database once a day after 03:00 Colombia time.
-Each day gets a folder in `/opt/ksmkshop/backups/` with one `pg_dump` file per database (custom format), and only the newest 7 days are kept.
-The script is `deploy/backup/pg-backup.sh`. If a dump fails, the half-written day is discarded and it retries every 10 minutes.
+En el panel DNS de donde compres el dominio (Porkbun, Namecheap, Cloudflare...):
 
-Check the latest backups and the log:
+| Tipo | Nombre | Valor | Para qué |
+| --- | --- | --- | --- |
+| A | `api` | IPv4 del VPS | La API; Caddy saca el certificado HTTPS |
+| A | `storefront` | IPv4 del VPS | Copia de la tienda servida desde el VPS, por si Netlify falla |
+| A (o ALIAS) | `@` (raíz) | `75.2.60.5` (o ALIAS a `apex-loadbalancer.netlify.com`) | La tienda en Netlify |
+| CNAME | `www` | `<tu-sitio>.netlify.app` | La tienda en Netlify |
+
+En Netlify: Site configuration > Domain management > Add a domain > `ksmkshop.com`. Netlify confirma los valores de la raíz y de `www` y emite su certificado.
+
+Los registros `api` y `storefront` deben resolver **antes** del primer despliegue: Caddy no consigue certificados sin ellos, y Let's Encrypt limita los reintentos. Compruébalo con:
 
 ```bash
-ssh root@<vps-ip> 'ls -l /opt/ksmkshop/backups/ && docker logs --tail 5 vape_backup'
+nslookup api.ksmkshop.com
 ```
 
-Make an extra backup right now (for example before an update):
+### 3. Desplegar la API
+
+Desde una copia de este repositorio en tu PC (en Windows, con Git Bash):
 
 ```bash
-ssh root@<vps-ip> 'docker exec vape_backup sh /usr/local/bin/pg-backup.sh once'
+VPS_HOST=<ip-del-vps> ACME_EMAIL=pabloandresmorenohidalgo@gmail.com ADMIN_EMAIL=pabloandresmorenohidalgo@gmail.com bash deploy/deploy-vps.sh
 ```
 
-The backups live on the same server, so they do not survive losing it.
-Copy them to your computer from time to time, or enable the provider's server backups:
+El script:
+
+1. Comprueba que `api.ksmkshop.com` apunta al VPS.
+2. Prepara el servidor: Docker, 2 GB de swap, firewall (solo SSH, 80 y 443), límite de logs y actualizaciones de seguridad automáticas.
+3. Clona `main` en `/opt/ksmkshop`.
+4. Genera en el servidor todos los secretos (`/opt/ksmkshop/.env`, permisos 600), incluida una contraseña aleatoria para el administrador.
+5. Levanta el stack con los respaldos diarios y espera a que `https://api.ksmkshop.com/api/v1/health` responda.
+
+Se puede volver a correr sin miedo: actualiza el código y conserva los secretos existentes.
+La primera vez tarda unos minutos porque construye las imágenes.
+
+### 4. Primer ingreso
+
+Lee la contraseña generada del administrador:
 
 ```bash
-scp -r root@<vps-ip>:/opt/ksmkshop/backups ./ksmkshop-backups
+ssh root@<ip-del-vps> 'grep ADMIN_ /opt/ksmkshop/.env'
 ```
 
-### Restoring
+Entra en `https://ksmkshop.com/admin` y cámbiala en **Mi cuenta**.
+Para crear la cuenta de otra persona (ver "Más administradores" en el README principal):
 
-On the server, from `/opt/ksmkshop`:
+```bash
+ssh root@<ip-del-vps> 'cd /opt/ksmkshop && docker compose exec gateway php artisan admin:create correo@ejemplo.com --name="Nombre"'
+```
+
+### 5. La tienda
+
+Netlify construye `app/frontend` sola en cada push a `main` (configuración en `netlify.toml`). No necesita variables de entorno.
+Despliega la API antes de publicar cambios de la tienda que dependan de rutas nuevas; si no, la tienda carga pero sus llamadas a `/api` fallan.
+
+## Actualizar la API
+
+```bash
+ssh root@<ip-del-vps> 'cd /opt/ksmkshop && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d --build'
+```
+
+O vuelve a correr `deploy/deploy-vps.sh`, que hace lo mismo y además revisa el servidor.
+
+## Respaldos
+
+El servicio `backup` de `docker-compose.prod.yml` (contenedor `vape_backup`) respalda todas las bases una vez al día, después de las 03:00 hora de Colombia.
+Cada día queda en una carpeta de `/opt/ksmkshop/backups/` con un archivo `pg_dump` por base (formato custom), y solo se conservan los 7 días más recientes.
+El script es `deploy/backup/pg-backup.sh`. Si un respaldo falla, descarta el día a medias y lo reintenta cada 10 minutos.
+
+Ver los últimos respaldos y el log:
+
+```bash
+ssh root@<ip-del-vps> 'ls -l /opt/ksmkshop/backups/ && docker logs --tail 5 vape_backup'
+```
+
+Hacer un respaldo extra ahora mismo (por ejemplo, antes de actualizar):
+
+```bash
+ssh root@<ip-del-vps> 'docker exec vape_backup sh /usr/local/bin/pg-backup.sh once'
+```
+
+Los respaldos viven en el mismo servidor, así que no sobreviven si se pierde. Cópialos a tu PC de vez en cuando, o activa los respaldos del proveedor:
+
+```bash
+scp -r root@<ip-del-vps>:/opt/ksmkshop/backups ./ksmkshop-backups
+```
+
+### Restaurar
+
+En el servidor, desde `/opt/ksmkshop`. Sin argumentos, lista los días disponibles:
 
 ```bash
 bash deploy/backup/restore.sh
 ```
 
-Without arguments it lists the available days. To restore:
+Restaurar todas las bases de un día:
 
 ```bash
 bash deploy/backup/restore.sh 2026-10-14
 ```
 
+Restaurar solo una base:
+
 ```bash
 bash deploy/backup/restore.sh 2026-10-14 vape_orders
 ```
 
-The first restores every database from that day; the second only one (`vape_gateway` holds the admin accounts, `vape_orders` the orders and carts, `vape_catalog` the products, `vape_inventory` the stock, `vape_business` the store profile and messages, `vape_notifications` the SMS log).
-It asks you to type `RESTAURAR`, stops the gateway and the services, replaces the current contents with the backup and starts them again, even if the restore fails halfway.
-Anything written after that backup is lost, so make a fresh backup first if you may want to come back.
+Qué guarda cada base: `vape_gateway` las cuentas de administrador, `vape_orders` los pedidos y carritos, `vape_catalog` los productos, `vape_inventory` el stock, `vape_business` el perfil de la tienda y los mensajes, `vape_notifications` el registro de SMS.
 
-To restore on a new server, copy the day's folder into `/opt/ksmkshop/backups/` after the first deploy and run the same command.
+El script pide escribir `RESTAURAR`, detiene el gateway y los servicios, reemplaza el contenido actual por el del respaldo y los vuelve a arrancar, incluso si la restauración falla a mitad de camino.
+Se pierde todo lo que se escribió después de ese respaldo, así que haz uno nuevo antes si quizá quieras volver atrás.
 
-## Rollback
+Para restaurar en un servidor nuevo, copia la carpeta del día a `/opt/ksmkshop/backups/` después del primer despliegue y corre el mismo comando.
 
-- Storefront: in Netlify, publish a previous deploy, or set the build to `publish = "public"` with no base or command to serve the legacy static site.
-- API: `git checkout <previous-commit>` on the VPS and run the update command.
+## Volver atrás
 
-## Environment variables
+- Tienda: en Netlify, Deploys > elige un despliegue anterior > Publish deploy.
+- API: en el VPS, `git checkout <commit-anterior>` y corre el comando de actualización.
 
-See `deploy/env.example` for every variable and its purpose.
+## Variables de entorno
+
+Ver `deploy/env.example` para cada variable y su propósito.
