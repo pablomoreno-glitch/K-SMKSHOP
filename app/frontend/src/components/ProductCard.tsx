@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 import { Check, Plus } from "lucide-react";
 import type { Product } from "../types";
 import { formatNicotine, formatPrice, formatPuffs } from "../lib/format";
-import { useSetCartItem } from "../lib/cart";
+import { useAddToCart } from "../lib/cart";
 
 export function ProductCard({ product }: { product: Product }) {
   const [confirmed, setConfirmed] = useState(false);
-  const setCartItem = useSetCartItem();
+  const addToCart = useAddToCart();
 
   function handleAdd(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    setCartItem.mutate(
+    addToCart.mutate(
       { ref: product.ref, quantity: 1, source: "catalog" },
       {
         onSuccess: () => {
@@ -60,7 +60,7 @@ export function ProductCard({ product }: { product: Product }) {
             type="button"
             aria-label={`Agregar ${product.name} al carrito`}
             onClick={handleAdd}
-            disabled={setCartItem.isPending}
+            disabled={addToCart.isPending}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-paper transition-transform hover:scale-105 disabled:opacity-60"
           >
             {confirmed ? <Check size={18} strokeWidth={2.25} /> : <Plus size={18} strokeWidth={2.25} />}

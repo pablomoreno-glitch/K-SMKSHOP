@@ -6,7 +6,7 @@ import { ApiError } from "../lib/api";
 import { formatPrice, formatPuffs } from "../lib/format";
 import { BRAND, whatsappLink } from "../lib/brand";
 import { DEVICE_TYPE_LABELS } from "../lib/filters";
-import { useSetCartItem } from "../lib/cart";
+import { useAddToCart } from "../lib/cart";
 import { lineTotal } from "../lib/pricing";
 import { AvailabilityPill } from "../components/AvailabilityPill";
 import { QuantityStepper } from "../components/QuantityStepper";
@@ -31,7 +31,7 @@ export function Product() {
   const product = useProduct(slug);
   const related = useRelatedProducts(slug);
   const availability = useAvailability(product.data ? [product.data.ref] : []);
-  const setCartItem = useSetCartItem();
+  const addToCart = useAddToCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -130,9 +130,9 @@ export function Product() {
             <button
               type="button"
               onClick={() =>
-                setCartItem.mutate({ ref: item.ref, quantity, source: "catalog" }, { onSuccess: () => setAdded(true) })
+                addToCart.mutate({ ref: item.ref, quantity, source: "catalog" }, { onSuccess: () => setAdded(true) })
               }
-              disabled={isOut || setCartItem.isPending}
+              disabled={isOut || addToCart.isPending}
               className="flex-1 rounded-pill bg-forest px-6 py-3 text-body font-semibold text-paper hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
             >
               {added ? "En tu carrito" : `Agregar ${total !== null ? formatPrice(total) : ""}`}

@@ -4,6 +4,9 @@ import type { Cart, CartSource, CheckoutResponse } from "../types";
 
 const CART_TOKEN_KEY = "vp_cart_token";
 
+/** The orders service rejects lines above this quantity. */
+export const MAX_CART_QUANTITY = 99;
+
 export function getCartToken(): string | null {
   try {
     return localStorage.getItem(CART_TOKEN_KEY);
@@ -86,6 +89,32 @@ export function useSetCartItem() {
         }
         throw error;
       }
+    },
+    onSuccess: (cart) => {
+      queryClient.setQueryData(cartQueryKey, cart);
+    },
+  });
+}
+
+/** Quantity a line should have after adding `amount` units of `ref` to what the cart already holds. */
+export function quantityAfterAdding(cart: Cart | undefined, ref: string, amount: number): number {
+  const current = cart?.items.find((item) => item.ref === ref)?.quantity ?? 0;
+  return Math.min(MAX_CART_QUANTITY, current + amount);
+}
+
+/**
+ * Add units to the cart. The cart is re-read first so the new quantity builds on what the
+ * server holds (another tab or the cart page may have changed it), not on a stale cache.
+ */
+export function useAddToCart() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { ref: string; quantity: number; source?: CartSource }) => {
+      const cart = await fetchOrCreateCart();
+      return api.put<Cart>(`/v1/cart/${cart.token}/items/${input.ref}`, {
+        quantity: quantityAfterAdding(cart, input.ref, input.quantity),
+        source: input.source ?? "catalog",
+      });
     },
     onSuccess: (cart) => {
       queryClient.setQueryData(cartQueryKey, cart);
