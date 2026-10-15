@@ -76,6 +76,55 @@ Deploy the API (step 3) before merging `dev` into the production branch, otherwi
 ssh root@<vps-ip> 'cd /opt/ksmkshop && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d --build'
 ```
 
+## Backups
+
+The `backup` service of `docker-compose.prod.yml` (container `vape_backup`) dumps every database once a day after 03:00 Colombia time.
+Each day gets a folder in `/opt/ksmkshop/backups/` with one `pg_dump` file per database (custom format), and only the newest 7 days are kept.
+The script is `deploy/backup/pg-backup.sh`. If a dump fails, the half-written day is discarded and it retries every 10 minutes.
+
+Check the latest backups and the log:
+
+```bash
+ssh root@<vps-ip> 'ls -l /opt/ksmkshop/backups/ && docker logs --tail 5 vape_backup'
+```
+
+Make an extra backup right now (for example before an update):
+
+```bash
+ssh root@<vps-ip> 'docker exec vape_backup sh /usr/local/bin/pg-backup.sh once'
+```
+
+The backups live on the same server, so they do not survive losing it.
+Copy them to your computer from time to time, or enable the provider's server backups:
+
+```bash
+scp -r root@<vps-ip>:/opt/ksmkshop/backups ./ksmkshop-backups
+```
+
+### Restoring
+
+On the server, from `/opt/ksmkshop`:
+
+```bash
+bash deploy/backup/restore.sh
+```
+
+Without arguments it lists the available days. To restore:
+
+```bash
+bash deploy/backup/restore.sh 2026-10-14
+```
+
+```bash
+bash deploy/backup/restore.sh 2026-10-14 vape_orders
+```
+
+The first restores every database from that day; the second only one (`vape_gateway` holds the admin accounts, `vape_orders` the orders and carts, `vape_catalog` the products, `vape_inventory` the stock, `vape_business` the store profile and messages, `vape_notifications` the SMS log).
+It asks you to type `RESTAURAR`, stops the gateway and the services, replaces the current contents with the backup and starts them again, even if the restore fails halfway.
+Anything written after that backup is lost, so make a fresh backup first if you may want to come back.
+
+To restore on a new server, copy the day's folder into `/opt/ksmkshop/backups/` after the first deploy and run the same command.
+
 ## Rollback
 
 - Storefront: in Netlify, publish a previous deploy, or set the build to `publish = "public"` with no base or command to serve the legacy static site.

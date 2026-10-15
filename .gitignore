@@ -28,5 +28,8 @@ dist/
 *.tsbuildinfo
 vendor/
 
+# Database backups (deploy/backup)
+backups/
+
 # Local agent tooling
 .atl/

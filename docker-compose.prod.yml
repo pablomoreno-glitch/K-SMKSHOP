@@ -9,6 +9,8 @@
 # - Secrets come from .env on the host (see deploy/env.example); there are no
 #   insecure defaults for the internal token, admin password or app key.
 # - The gateway runs with APP_ENV=production.
+# - The backup service dumps every database to ./backups once a day and keeps
+#   the last 7 days (deploy/backup/pg-backup.sh).
 
 services:
   postgres:
@@ -50,3 +52,25 @@ services:
 
   frontend:
     ports: !reset []
+
+  # Daily pg_dump of every database to ./backups on the host, 7 days kept.
+  backup:
+    image: postgres:16-alpine
+    container_name: vape_backup
+    entrypoint: ["sh", "/usr/local/bin/pg-backup.sh"]
+    environment:
+      PGHOST: postgres
+      PGUSER: vape
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      BACKUP_HOUR: "3"
+      BACKUP_KEEP_DAYS: "7"
+      # Colombia time (UTC-5, no daylight saving) without depending on tzdata.
+      TZ: "<-05>5"
+    volumes:
+      - ./deploy/backup/pg-backup.sh:/usr/local/bin/pg-backup.sh:ro
+      - ./backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [vape]
